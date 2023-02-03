@@ -2,19 +2,16 @@ use engine::render::{
     self,
     builder::{
         pass::{RenderPassBuilder, RenderPassColorAttachmentBuilder},
-        pipeline::PipelineBuilder,
     },
     color::Color,
     framework::{EventLoop, Framework},
     material::{
-        color::{RawStaticColorMaterial, StaticColorMaterial},
-        RawMaterial, RawMaterialRender, ToRawMaterial,
+        color::{RawStaticColorMaterial, StaticColorMaterial}, RawMaterialRender, ToRawMaterial,
     },
-    mesh::{ArenaRawMesh, Mesh, MeshRender, RawMesh},
-    vertex::{Vertex, VertexDescriptor},
-    BufferArena,
+    mesh::{Mesh, MeshRender, RawMesh},
+    vertex::{Vertex},
 };
-use wgpu::{util::DeviceExt, RenderPipeline};
+
 use winit::window::Window;
 
 pub mod chunk;

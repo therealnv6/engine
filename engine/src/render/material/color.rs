@@ -1,4 +1,4 @@
-use glam::Vec4;
+
 use typed_builder::TypedBuilder;
 use wgpu::{util::DeviceExt, BindGroup};
 
@@ -16,10 +16,8 @@ pub struct StaticColorMaterial {
 }
 
 pub struct RawStaticColorMaterial {
-    color: wgpu::Buffer,
     pipeline: wgpu::RenderPipeline,
     bind_group: wgpu::BindGroup,
-    bind_group_layout: wgpu::BindGroupLayout,
 }
 
 impl ToRawMaterial<RawStaticColorMaterial> for StaticColorMaterial {
@@ -61,10 +59,8 @@ impl ToRawMaterial<RawStaticColorMaterial> for StaticColorMaterial {
             .into_pipeline(device, config);
 
         RawStaticColorMaterial {
-            color: color_buffer,
             pipeline,
             bind_group,
-            bind_group_layout,
         }
     }
 }

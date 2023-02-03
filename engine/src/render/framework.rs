@@ -37,9 +37,9 @@ pub trait Framework: 'static + Sized {
 
     fn resize(
         &mut self,
-        config: &wgpu::SurfaceConfiguration,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
+        _config: &wgpu::SurfaceConfiguration,
+        _device: &wgpu::Device,
+        _queue: &wgpu::Queue,
     ) {
     }
 
@@ -56,9 +56,9 @@ pub trait Framework: 'static + Sized {
         FramerateLimit::Limited(120)
     }
 
-    fn input(&mut self, device_id: DeviceId, event: DeviceEvent) {}
+    fn input(&mut self, _device_id: DeviceId, _event: DeviceEvent) {}
 
-    fn on_event(&mut self, event: WindowEvent, control_flow: &mut ControlFlow) {}
+    fn on_event(&mut self, _event: WindowEvent, _control_flow: &mut ControlFlow) {}
 }
 
 // #[autodefault::autodefault]

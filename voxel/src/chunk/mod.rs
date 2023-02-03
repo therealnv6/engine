@@ -39,7 +39,7 @@ impl Chunk {
 }
 
 pub fn test() {
-    let [x, y, z] = Chunk::delinearize(3i8);
-    let [x, y, z] = Chunk::delinearize(3usize);
-    let [x, y, z] = Chunk::delinearize(3i64);
+    let [_x, _y, _z] = Chunk::delinearize(3i8);
+    let [_x, _y, _z] = Chunk::delinearize(3usize);
+    let [_x, _y, _z] = Chunk::delinearize(3i64);
 }
