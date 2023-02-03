@@ -1,7 +1,3 @@
-
-
-
-
 pub mod color;
 
 pub trait ToRawMaterial<T: RawMaterial> {

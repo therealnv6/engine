@@ -1,4 +1,3 @@
-
 use typed_builder::TypedBuilder;
 use wgpu::{util::DeviceExt, BindGroup};
 
@@ -26,10 +25,10 @@ impl ToRawMaterial<RawStaticColorMaterial> for StaticColorMaterial {
         device: &wgpu::Device,
         config: &wgpu::SurfaceConfiguration,
     ) -> RawStaticColorMaterial {
-        // let color_vec: Vec4 = self.color.into();
+        let color_tab: [f32; 4] = self.color.into();
         let color_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("voxel_chunk_vertices"),
-            contents: bytemuck::cast_slice(&[self.color]),
+            contents: bytemuck::cast_slice(&color_tab),
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
 
@@ -93,7 +92,7 @@ impl RawStaticColorMaterial {
             label: Some("static-color-layout"),
             entries: &[wgpu::BindGroupLayoutEntry {
                 binding: 0,
-                visibility: wgpu::ShaderStages::VERTEX,
+                visibility: wgpu::ShaderStages::FRAGMENT,
                 ty: wgpu::BindingType::Buffer {
                     ty: wgpu::BufferBindingType::Uniform,
                     has_dynamic_offset: false,

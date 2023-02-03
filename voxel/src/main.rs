@@ -1,15 +1,14 @@
 use engine::render::{
     self,
-    builder::{
-        pass::{RenderPassBuilder, RenderPassColorAttachmentBuilder},
-    },
+    builder::pass::{RenderPassBuilder, RenderPassColorAttachmentBuilder},
     color::Color,
     framework::{EventLoop, Framework},
     material::{
-        color::{RawStaticColorMaterial, StaticColorMaterial}, RawMaterialRender, ToRawMaterial,
+        color::{RawStaticColorMaterial, StaticColorMaterial},
+        RawMaterialRender, ToRawMaterial,
     },
     mesh::{Mesh, MeshRender, RawMesh},
-    vertex::{Vertex},
+    vertex::Vertex,
 };
 
 use winit::window::Window;
@@ -72,7 +71,7 @@ impl Framework for VoxelFramework {
         // we want to get the "raw" mesh here, so we don't create new buffers every single time we make a new raw mesh.
         let tri_raw_mesh = tri_mesh.to_raw(device);
         let tri_mat = StaticColorMaterial::builder()
-            .color([1.0, 0.0, 0.0, 1.0].into())
+            .color([1.0, 0.0, 1.0, 0.3].into())
             .build()
             .to_raw(device, config);
 

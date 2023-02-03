@@ -1,7 +1,7 @@
 use glam::Vec4;
 
 #[repr(C)]
-#[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+#[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct Color {
     pub(crate) r: f64,
     pub(crate) g: f64,
@@ -23,6 +23,18 @@ impl Color {
 impl Into<Vec4> for Color {
     fn into(self) -> Vec4 {
         Vec4::new(self.r as f32, self.g as f32, self.b as f32, self.a as f32)
+    }
+}
+
+impl Into<[f32; 4]> for Color {
+    fn into(self) -> [f32; 4] {
+        [self.r as f32, self.g as f32, self.b as f32, self.a as f32]
+    }
+}
+
+impl Into<[f64; 4]> for Color {
+    fn into(self) -> [f64; 4] {
+        [self.r as f64, self.g as f64, self.b as f64, self.a as f64]
     }
 }
 
