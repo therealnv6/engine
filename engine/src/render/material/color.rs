@@ -4,10 +4,9 @@ use wgpu::{util::DeviceExt, BindGroup};
 use crate::render::{
     builder::pipeline::PipelineBuilder,
     color::Color,
+    raw::{IntoRawBinder, RawBinder},
     vertex::{Vertex, VertexDescriptor},
 };
-
-use super::{RawMaterial, ToRawMaterial};
 
 #[derive(TypedBuilder)]
 pub struct StaticColorMaterial {
@@ -19,12 +18,18 @@ pub struct RawStaticColorMaterial {
     bind_group: wgpu::BindGroup,
 }
 
-impl ToRawMaterial<RawStaticColorMaterial> for StaticColorMaterial {
-    fn to_raw(
-        &self,
-        device: &wgpu::Device,
-        config: &wgpu::SurfaceConfiguration,
-    ) -> RawStaticColorMaterial {
+impl RawBinder<StaticColorMaterial> for RawStaticColorMaterial {
+    fn bind_to_pass<'a>(&'a self, idx: u32, render_pass: &mut wgpu::RenderPass<'a>) {
+        render_pass.set_pipeline(&self.pipeline);
+        render_pass.set_bind_group(idx, &self.bind_group, &[]);
+    }
+}
+
+impl IntoRawBinder<RawStaticColorMaterial> for StaticColorMaterial {
+    fn into_raw(&self, params: &crate::render::raw::RawParams) -> RawStaticColorMaterial {
+        let device = params.device;
+        let config = params.config;
+
         let color_tab: [f32; 4] = self.color.into();
         let color_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("voxel_chunk_vertices"),
@@ -61,13 +66,6 @@ impl ToRawMaterial<RawStaticColorMaterial> for StaticColorMaterial {
             pipeline,
             bind_group,
         }
-    }
-}
-
-impl RawMaterial for RawStaticColorMaterial {
-    fn bind_to_pass<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
-        render_pass.set_pipeline(&self.pipeline);
-        render_pass.set_bind_group(0, &self.bind_group, &[]);
     }
 }
 

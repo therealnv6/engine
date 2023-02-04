@@ -6,6 +6,7 @@ pub mod color;
 pub mod framework;
 pub mod material;
 pub mod mesh;
+pub mod raw;
 pub mod time;
 pub mod vertex;
 

@@ -23,14 +23,12 @@ pub struct Camera {
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct CameraBind {
+pub struct CameraPerspective {
     pub(crate) view_projection: [[f32; 4]; 4],
 }
 
-pub struct RawCameraBind {
-    pub(crate) buffer: wgpu::Buffer,
+pub struct CameraBind {
     pub(crate) bind_group: wgpu::BindGroup,
-    pub(crate) bind_group_layout: wgpu::BindGroupLayout,
 }
 
 impl Camera {
@@ -42,7 +40,7 @@ impl Camera {
     }
 }
 
-impl CameraBind {
+impl CameraPerspective {
     pub fn new() -> Self {
         Self {
             view_projection: Mat4::IDENTITY.to_cols_array_2d(),
@@ -53,12 +51,12 @@ impl CameraBind {
         self.view_projection = camera.build_view_matrix().to_cols_array_2d();
     }
 
-    pub fn create_raw_bind<'a>(&self, device: &wgpu::Device, contents: &'a [u8]) -> RawCameraBind {
-        RawCameraBind::new(device, contents)
+    pub fn create_raw_bind<'a>(&self, device: &wgpu::Device, contents: &'a [u8]) -> CameraBind {
+        CameraBind::new(device, contents)
     }
 }
 
-impl RawCameraBind {
+impl CameraBind {
     pub fn new<'a>(device: &wgpu::Device, contents: &'a [u8]) -> Self {
         let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("camera_bind_group_layout"),
@@ -89,8 +87,6 @@ impl RawCameraBind {
                 }],
                 label: Some("camera_bind_group"),
             }),
-            buffer,
-            bind_group_layout: layout,
         }
     }
 
@@ -100,11 +96,11 @@ impl RawCameraBind {
 }
 
 pub trait CameraRender<'a> {
-    fn bind_camera(&mut self, idx: u32, camera: &'a RawCameraBind);
+    fn bind_camera(&mut self, idx: u32, camera: &'a CameraBind);
 }
 
 impl<'a> CameraRender<'a> for RenderPass<'a> {
-    fn bind_camera(&mut self, idx: u32, camera: &'a RawCameraBind) {
+    fn bind_camera(&mut self, idx: u32, camera: &'a CameraBind) {
         camera.bind_to_pass(idx, self);
     }
 }

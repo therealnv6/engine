@@ -1,14 +1,13 @@
 use engine::render::{
     self,
     builder::pass::{RenderPassBuilder, RenderPassColorAttachmentBuilder},
+    camera::{Camera, CameraBind, CameraPerspective, CameraRender},
     color::Color,
     framework::{EventLoop, Framework},
-    material::{
-        color::{RawStaticColorMaterial, StaticColorMaterial},
-        RawMaterialRender, ToRawMaterial,
-    },
+    material::color::{RawStaticColorMaterial, StaticColorMaterial},
     mesh::{Mesh, MeshRender, RawMesh},
-    vertex::Vertex, camera::{RawCameraBind, CameraBind, Camera, CameraRender},
+    raw::{IntoRawBinder, RawParams, RawBindingRender},
+    vertex::Vertex,
 };
 
 use glam::Vec3;
@@ -27,8 +26,8 @@ pub struct VoxelFramework {
     tri_mat: RawStaticColorMaterial,
     // camera
     camera: Camera,
-    bind_camera: CameraBind,
-    raw_bind_camera: RawCameraBind,
+    bind_camera: CameraPerspective,
+    raw_bind_camera: CameraBind,
 }
 
 const VERTICES: &[([f32; 3], [f32; 3])] = &[
@@ -73,12 +72,14 @@ impl Framework for VoxelFramework {
                 .collect::<Vec<f32>>()
         );
 
+        let params: RawParams = (device, config).into();
+
         // we want to get the "raw" mesh here, so we don't create new buffers every single time we make a new raw mesh.
         let tri_raw_mesh = tri_mesh.to_raw(device);
         let tri_mat = StaticColorMaterial::builder()
             .color([1.0, 0.0, 1.0, 0.3].into())
             .build()
-            .to_raw(device, config);
+            .into_raw(&params);
 
         let camera = Camera::builder()
             .eye([0.0, 1.0, 2.0].into())
@@ -89,9 +90,10 @@ impl Framework for VoxelFramework {
             .znear(0.1)
             .zfar(100.0)
             .build();
-        
-        let bind_camera = CameraBind::new();
-        let raw_bind_camera = bind_camera.create_raw_bind(device, bytemuck::cast_slice(&[bind_camera]));
+
+        let bind_camera = CameraPerspective::new();
+        let raw_bind_camera =
+            bind_camera.create_raw_bind(device, bytemuck::cast_slice(&[bind_camera]));
 
         Self {
             tri_raw_mesh,
@@ -126,7 +128,7 @@ impl Framework for VoxelFramework {
             .build()
             .begin(encoder);
 
-        render_pass.bind_material(&self.tri_mat);
+        render_pass.bind_raw(0, &self.tri_mat);
         render_pass.bind_camera(1, &self.raw_bind_camera);
         render_pass.render_mesh(0, &self.tri_raw_mesh);
     }
