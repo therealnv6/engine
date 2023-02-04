@@ -203,7 +203,7 @@ pub fn run<T: Framework>(window: Window, event_loop: EventLoop) {
                         *control_flow = ControlFlow::WaitUntil(now + target_frametime - delta);
                     }
                 }
-            },
+            }
             Event::MainEventsCleared => {
                 window.request_redraw();
             }

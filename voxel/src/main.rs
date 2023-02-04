@@ -1,11 +1,12 @@
 use engine::render::{
     self,
     builder::pass::{RenderPassBuilder, RenderPassColorAttachmentBuilder},
+    bundle::{MeshBundle, RawMeshBundle},
     camera::{Camera, CameraBind, CameraPerspective, CameraRender},
     color::Color,
     framework::{EventLoop, Framework},
     material::color::{RawStaticColorMaterial, StaticColorMaterial},
-    mesh::{Mesh, MeshRender, RawMesh},
+    mesh::Mesh,
     raw::{IntoRawBinder, RawBindingRender, RawParams},
     vertex::Vertex,
 };
@@ -22,8 +23,7 @@ fn main() {
 }
 
 pub struct VoxelFramework {
-    tri_raw_mesh: RawMesh,
-    tri_mat: RawStaticColorMaterial,
+    mesh_bundle: RawMeshBundle<RawStaticColorMaterial>,
     // camera
     camera: Camera,
     bind_camera: CameraPerspective,
@@ -76,16 +76,18 @@ impl Framework for VoxelFramework {
             bind_camera.create_raw_bind(device, bytemuck::cast_slice(&[bind_camera]));
 
         let params: RawParams = (device, config, &raw_bind_camera).into();
-
-        // we want to get the "raw" mesh here, so we don't create new buffers every single time we make a new raw mesh.
-        let tri_raw_mesh = tri_mesh.to_raw(device);
         let tri_mat = StaticColorMaterial::builder()
             .color([1.0, 0.0, 1.0, 0.3].into())
+            .build();
+
+        let raw_mesh_bundle = MeshBundle::builder()
+            .mesh(tri_mesh)
+            .material(tri_mat)
             .build()
             .into_raw(&params);
+
         Self {
-            tri_raw_mesh,
-            tri_mat,
+            mesh_bundle: raw_mesh_bundle,
             // camewa uwu
             camera,
             bind_camera,
@@ -98,7 +100,7 @@ impl Framework for VoxelFramework {
         time: &render::time::Time,
         encoder: &mut wgpu::CommandEncoder,
         view: &wgpu::TextureView,
-        device: &wgpu::Device,
+        _: &wgpu::Device,
         queue: &wgpu::Queue,
     ) {
         let clear_attachment = RenderPassColorAttachmentBuilder::builder()
@@ -121,8 +123,7 @@ impl Framework for VoxelFramework {
         self.raw_bind_camera
             .update_buffer(queue, bytemuck::cast_slice(&[self.bind_camera]));
 
-        render_pass.bind_raw(0, &self.tri_mat);
         render_pass.bind_camera(1, &self.raw_bind_camera);
-        render_pass.render_mesh(0, &self.tri_raw_mesh);
+        render_pass.bind_raw(0, &self.mesh_bundle);
     }
 }

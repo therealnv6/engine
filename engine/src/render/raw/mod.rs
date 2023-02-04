@@ -33,25 +33,26 @@ impl<'a>
     }
 }
 
-pub trait RawBinder<T: IntoRawBinder<Self>>
+pub trait RawBinder
 where
     Self: Sized,
 {
     fn bind_to_pass<'a>(&'a self, idx: u32, render_pass: &mut wgpu::RenderPass<'a>);
 }
 
-pub trait IntoRawBinder<T: RawBinder<Self>>
+pub trait IntoRawBinder
 where
     Self: Sized,
 {
-    fn into_raw(&self, params: &RawParams) -> T;
+    type RawBinder: RawBinder;
+    fn into_raw(&self, params: &RawParams) -> Self::RawBinder;
 }
 
-pub trait RawBindingRender<'a, T: RawBinder<U>, U: IntoRawBinder<T>> {
+pub trait RawBindingRender<'a, T: RawBinder> {
     fn bind_raw(&mut self, idx: u32, value: &'a T);
 }
 
-impl<'a, T: RawBinder<U>, U: IntoRawBinder<T>> RawBindingRender<'a, T, U> for wgpu::RenderPass<'a> {
+impl<'a, T: RawBinder> RawBindingRender<'a, T> for wgpu::RenderPass<'a> {
     fn bind_raw(&mut self, idx: u32, value: &'a T) {
         value.bind_to_pass(idx, self);
     }

@@ -18,14 +18,16 @@ pub struct RawStaticColorMaterial {
     bind_group: wgpu::BindGroup,
 }
 
-impl RawBinder<StaticColorMaterial> for RawStaticColorMaterial {
+impl RawBinder for RawStaticColorMaterial {
     fn bind_to_pass<'a>(&'a self, idx: u32, render_pass: &mut wgpu::RenderPass<'a>) {
         render_pass.set_pipeline(&self.pipeline);
         render_pass.set_bind_group(idx, &self.bind_group, &[]);
     }
 }
 
-impl IntoRawBinder<RawStaticColorMaterial> for StaticColorMaterial {
+impl IntoRawBinder for StaticColorMaterial {
+    type RawBinder = RawStaticColorMaterial;
+
     fn into_raw(&self, params: &crate::render::raw::RawParams) -> RawStaticColorMaterial {
         let device = params.device;
         let config = params.config;
