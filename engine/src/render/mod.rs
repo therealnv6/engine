@@ -1,6 +1,7 @@
 use generational_arena::Arena;
 
 pub mod builder;
+pub mod camera;
 pub mod color;
 pub mod framework;
 pub mod material;

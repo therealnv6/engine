@@ -5,15 +5,15 @@ pub trait ToRawMaterial<T: RawMaterial> {
 }
 
 pub trait RawMaterial {
-    fn draw_to_pass<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>);
+    fn bind_to_pass<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>);
 }
 
 pub trait RawMaterialRender<'a, T: RawMaterial> {
-    fn draw_material(&mut self, material: &'a T);
+    fn bind_material(&mut self, material: &'a T);
 }
 
 impl<'a, T: RawMaterial> RawMaterialRender<'a, T> for wgpu::RenderPass<'a> {
-    fn draw_material(&mut self, material: &'a T) {
-        material.draw_to_pass(self);
+    fn bind_material(&mut self, material: &'a T) {
+        material.bind_to_pass(self);
     }
 }

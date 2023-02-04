@@ -8,9 +8,10 @@ use engine::render::{
         RawMaterialRender, ToRawMaterial,
     },
     mesh::{Mesh, MeshRender, RawMesh},
-    vertex::Vertex,
+    vertex::Vertex, camera::{RawCameraBind, CameraBind, Camera, CameraRender},
 };
 
+use glam::Vec3;
 use winit::window::Window;
 
 pub mod chunk;
@@ -24,6 +25,10 @@ fn main() {
 pub struct VoxelFramework {
     tri_raw_mesh: RawMesh,
     tri_mat: RawStaticColorMaterial,
+    // camera
+    camera: Camera,
+    bind_camera: CameraBind,
+    raw_bind_camera: RawCameraBind,
 }
 
 const VERTICES: &[([f32; 3], [f32; 3])] = &[
@@ -75,9 +80,26 @@ impl Framework for VoxelFramework {
             .build()
             .to_raw(device, config);
 
+        let camera = Camera::builder()
+            .eye([0.0, 1.0, 2.0].into())
+            .target([0.0, 0.0, 0.0].into())
+            .up(Vec3::Y)
+            .aspect(config.width as f32 / config.height as f32)
+            .fovy(45.0)
+            .znear(0.1)
+            .zfar(100.0)
+            .build();
+        
+        let bind_camera = CameraBind::new();
+        let raw_bind_camera = bind_camera.create_raw_bind(device, bytemuck::cast_slice(&[bind_camera]));
+
         Self {
             tri_raw_mesh,
             tri_mat,
+            // camewa uwu
+            camera,
+            bind_camera,
+            raw_bind_camera,
         }
     }
 
@@ -104,7 +126,8 @@ impl Framework for VoxelFramework {
             .build()
             .begin(encoder);
 
-        render_pass.draw_material(&self.tri_mat);
+        render_pass.bind_material(&self.tri_mat);
+        render_pass.bind_camera(1, &self.raw_bind_camera);
         render_pass.render_mesh(0, &self.tri_raw_mesh);
     }
 }

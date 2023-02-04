@@ -65,7 +65,7 @@ impl ToRawMaterial<RawStaticColorMaterial> for StaticColorMaterial {
 }
 
 impl RawMaterial for RawStaticColorMaterial {
-    fn draw_to_pass<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
+    fn bind_to_pass<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
         render_pass.set_pipeline(&self.pipeline);
         render_pass.set_bind_group(0, &self.bind_group, &[]);
     }

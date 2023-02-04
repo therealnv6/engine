@@ -53,7 +53,7 @@ pub trait Framework: 'static + Sized {
     );
 
     fn maximum_framerate(&self) -> FramerateLimit {
-        FramerateLimit::Limited(120)
+        FramerateLimit::Unlimited
     }
 
     fn input(&mut self, _device_id: DeviceId, _event: DeviceEvent) {}
@@ -76,7 +76,7 @@ pub async fn init_wgpu<T: Framework>(window: Window, event_loop: EventLoop) -> W
 
     let adapter = instance
         .request_adapter(&wgpu::RequestAdapterOptions {
-            power_preference: wgpu::PowerPreference::default(),
+            power_preference: wgpu::PowerPreference::HighPerformance,
             compatible_surface: Some(&surface),
             force_fallback_adapter: false,
         })
@@ -128,7 +128,21 @@ pub fn run<T: Framework>(window: Window, event_loop: EventLoop) {
     let mut framework = T::init(&config, &adapter, &device, &queue);
     let mut time = Time::new();
 
+    let mut fps_counter = 0;
+    let mut fps_counter_time = Instant::now();
+
     event_loop.run(move |event, _, control_flow| {
+        fps_counter += 1;
+
+        if fps_counter_time.elapsed().as_secs() >= 1 {
+            let fps = fps_counter as f64 / fps_counter_time.elapsed().as_secs_f64();
+
+            window.set_title(&format!("Engine [{:.2} fps] (todo)", fps));
+
+            fps_counter = 0;
+            fps_counter_time = Instant::now();
+        }
+
         *control_flow = ControlFlow::Poll;
 
         let _ = (&instance, &adapter);
