@@ -24,7 +24,6 @@ fn main() {
 
 pub struct VoxelFramework {
     mesh_bundle: RawMeshBundle<RawStaticColorMaterial>,
-    // camera
     camera: Camera,
     bind_camera: CameraPerspective,
     raw_bind_camera: CameraBind,
@@ -88,7 +87,6 @@ impl Framework for VoxelFramework {
 
         Self {
             mesh_bundle: raw_mesh_bundle,
-            // camewa uwu
             camera,
             bind_camera,
             raw_bind_camera,
