@@ -12,9 +12,9 @@ const TRANSLATION_MATRIX: Mat4 = Mat4::from_cols(
 
 #[derive(TypedBuilder)]
 pub struct Camera {
-    eye: Vec3,
-    target: Vec3,
-    up: Vec3,
+    pub eye: Vec3,
+    pub target: Vec3,
+    pub up: Vec3,
     aspect: f32,
     fovy: f32,
     znear: f32,
@@ -28,7 +28,9 @@ pub struct CameraPerspective {
 }
 
 pub struct CameraBind {
+    pub(crate) buffer: wgpu::Buffer,
     pub(crate) bind_group: wgpu::BindGroup,
+    pub(crate) bind_group_layout: wgpu::BindGroupLayout,
 }
 
 impl Camera {
@@ -87,11 +89,17 @@ impl CameraBind {
                 }],
                 label: Some("camera_bind_group"),
             }),
+            bind_group_layout: layout,
+            buffer,
         }
     }
 
     pub fn bind_to_pass<'a>(&'a self, idx: u32, render_pass: &mut wgpu::RenderPass<'a>) {
         render_pass.set_bind_group(idx, &self.bind_group, &[]);
+    }
+
+    pub fn update_buffer<'a>(&mut self, queue: &wgpu::Queue, slice: &'a [u8]) {
+        queue.write_buffer(&self.buffer, 0, slice);
     }
 }
 

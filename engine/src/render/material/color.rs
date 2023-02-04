@@ -44,7 +44,7 @@ impl IntoRawBinder<RawStaticColorMaterial> for StaticColorMaterial {
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Render Pipeline Layout"),
-                bind_group_layouts: &[&bind_group_layout],
+                bind_group_layouts: &[&bind_group_layout, &params.raw_camera.bind_group_layout],
                 push_constant_ranges: &[],
             });
 

@@ -6,7 +6,7 @@ use engine::render::{
     framework::{EventLoop, Framework},
     material::color::{RawStaticColorMaterial, StaticColorMaterial},
     mesh::{Mesh, MeshRender, RawMesh},
-    raw::{IntoRawBinder, RawParams, RawBindingRender},
+    raw::{IntoRawBinder, RawBindingRender, RawParams},
     vertex::Vertex,
 };
 
@@ -60,29 +60,8 @@ impl Framework for VoxelFramework {
             .indices(vec![0, 1, 4, 1, 2, 4, 2, 3, 4, 0])
             .build();
 
-        assert_eq!(
-            tri_mesh
-                .vertices
-                .iter()
-                .flat_map(|vertex| vertex.position)
-                .collect::<Vec<f32>>(),
-            VERTICES
-                .iter()
-                .flat_map(|vertex| vertex.0)
-                .collect::<Vec<f32>>()
-        );
-
-        let params: RawParams = (device, config).into();
-
-        // we want to get the "raw" mesh here, so we don't create new buffers every single time we make a new raw mesh.
-        let tri_raw_mesh = tri_mesh.to_raw(device);
-        let tri_mat = StaticColorMaterial::builder()
-            .color([1.0, 0.0, 1.0, 0.3].into())
-            .build()
-            .into_raw(&params);
-
         let camera = Camera::builder()
-            .eye([0.0, 1.0, 2.0].into())
+            .eye([1.0, 1.0, 2.0].into())
             .target([0.0, 0.0, 0.0].into())
             .up(Vec3::Y)
             .aspect(config.width as f32 / config.height as f32)
@@ -92,9 +71,18 @@ impl Framework for VoxelFramework {
             .build();
 
         let bind_camera = CameraPerspective::new();
+
         let raw_bind_camera =
             bind_camera.create_raw_bind(device, bytemuck::cast_slice(&[bind_camera]));
 
+        let params: RawParams = (device, config, &raw_bind_camera).into();
+
+        // we want to get the "raw" mesh here, so we don't create new buffers every single time we make a new raw mesh.
+        let tri_raw_mesh = tri_mesh.to_raw(device);
+        let tri_mat = StaticColorMaterial::builder()
+            .color([1.0, 0.0, 1.0, 0.3].into())
+            .build()
+            .into_raw(&params);
         Self {
             tri_raw_mesh,
             tri_mat,
@@ -107,11 +95,11 @@ impl Framework for VoxelFramework {
 
     fn render(
         &mut self,
-        _: &render::time::Time,
+        time: &render::time::Time,
         encoder: &mut wgpu::CommandEncoder,
         view: &wgpu::TextureView,
-        _: &wgpu::Device,
-        _: &wgpu::Queue,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
     ) {
         let clear_attachment = RenderPassColorAttachmentBuilder::builder()
             .ops(wgpu::Operations {
@@ -127,6 +115,11 @@ impl Framework for VoxelFramework {
             .color_attachments(&tri_attachments)
             .build()
             .begin(encoder);
+
+        self.camera.eye.x += 5.0 * time.delta_seconds_f32();
+        self.bind_camera.update_view_proj(&self.camera);
+        self.raw_bind_camera
+            .update_buffer(queue, bytemuck::cast_slice(&[self.bind_camera]));
 
         render_pass.bind_raw(0, &self.tri_mat);
         render_pass.bind_camera(1, &self.raw_bind_camera);

@@ -1,18 +1,34 @@
 use typed_builder::TypedBuilder;
 
+use super::camera::CameraBind;
+
 pub mod storage;
 
 #[derive(TypedBuilder)]
 pub struct RawParams<'a> {
     pub device: &'a wgpu::Device,
     pub config: &'a wgpu::SurfaceConfiguration,
+    pub raw_camera: &'a CameraBind,
 }
 
-impl<'a> From<(&'a wgpu::Device, &'a wgpu::SurfaceConfiguration)> for RawParams<'a> {
-    fn from(value: (&'a wgpu::Device, &'a wgpu::SurfaceConfiguration)) -> Self {
+impl<'a>
+    From<(
+        &'a wgpu::Device,
+        &'a wgpu::SurfaceConfiguration,
+        &'a CameraBind,
+    )> for RawParams<'a>
+{
+    fn from(
+        value: (
+            &'a wgpu::Device,
+            &'a wgpu::SurfaceConfiguration,
+            &'a CameraBind,
+        ),
+    ) -> Self {
         Self {
             device: value.0,
             config: value.1,
+            raw_camera: value.2,
         }
     }
 }
