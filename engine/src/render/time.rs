@@ -16,11 +16,11 @@ impl Time {
     }
 
     pub fn delta_seconds_f64(&self) -> f64 {
-        Instant::now().duration_since(self.last_time).as_secs_f64()
+        self.time_delta().as_secs_f64()
     }
 
     pub fn delta_seconds_f32(&self) -> f32 {
-        Instant::now().duration_since(self.last_time).as_secs_f32()
+        self.time_delta().as_secs_f32()
     }
 
     pub fn post_update(&mut self) {

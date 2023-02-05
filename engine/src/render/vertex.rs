@@ -1,5 +1,8 @@
 use glam::{Mat4, Quat, Vec3};
 use typed_builder::TypedBuilder;
+use wgpu::{util::DeviceExt, BufferUsages};
+
+use super::raw::RawParams;
 
 #[repr(C)]
 #[derive(TypedBuilder, Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable, PartialEq)]
@@ -23,6 +26,7 @@ impl VertexDescriptor<2> for Vertex {
     }
 }
 
+#[derive(TypedBuilder)]
 pub struct Transform {
     pub translation: Vec3,
     pub rotation: Quat,
@@ -30,24 +34,24 @@ pub struct Transform {
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct RawTransform {
+pub struct TransformRaw {
     pub model: [[f32; 4]; 4],
     pub normal_matrix: [[f32; 4]; 4],
 }
 
 impl Transform {
-    pub fn to_raw(&self) -> RawTransform {
+    pub fn to_raw<'a>(&self, params: &'a RawParams) -> TransformRaw {
         let model = Mat4::from_translation(self.translation) * Mat4::from_quat(self.rotation);
         let normal_matrix = model.inverse().transpose();
 
-        RawTransform {
+        TransformRaw {
             model: model.to_cols_array_2d(),
             normal_matrix: normal_matrix.to_cols_array_2d(),
         }
     }
 }
 
-impl VertexDescriptor<8> for RawTransform {
+impl VertexDescriptor<8> for TransformRaw {
     const ATTRIBS: [wgpu::VertexAttribute; 8] = wgpu::vertex_attr_array![
         0 => Float32x4,
         1 => Float32x4,

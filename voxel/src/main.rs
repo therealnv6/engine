@@ -8,10 +8,10 @@ use engine::render::{
     material::color::{RawStaticColorMaterial, StaticColorMaterial},
     mesh::Mesh,
     raw::{IntoRawBinder, RawBindingRender, RawParams},
-    vertex::Vertex,
+    vertex::{Transform, Vertex},
 };
 
-use glam::Vec3;
+use glam::{Quat, Vec3, Vec4};
 use winit::window::Window;
 
 pub mod chunk;
@@ -76,12 +76,21 @@ impl Framework for VoxelFramework {
 
         let params: RawParams = (device, config, &raw_bind_camera).into();
         let tri_mat = StaticColorMaterial::builder()
-            .color([1.0, 0.0, 1.0, 0.3].into())
+            .color(<[f32; 4] as Into<engine::render::color::Color>>::into([
+                1.0, 0.0, 1.0, 0.3,
+            ]))
             .build();
 
         let raw_mesh_bundle = MeshBundle::builder()
             .mesh(tri_mesh)
             .material(tri_mat)
+            // transforms don't work yet!
+            .transform(
+                Transform::builder()
+                    .translation([1.0, 1.0, 1.0].into())
+                    .rotation(Quat::from_vec4(Vec4::ZERO))
+                    .build(),
+            )
             .build()
             .into_raw(&params);
 
@@ -107,7 +116,7 @@ impl Framework for VoxelFramework {
                 store: true,
             })
             .build()
-            .into_color_attachment_opt(view);
+            .attach_opt(view);
 
         let tri_attachments = [clear_attachment];
         let mut render_pass = RenderPassBuilder::builder()

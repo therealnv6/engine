@@ -19,16 +19,16 @@ impl<'a>
     )> for RawParams<'a>
 {
     fn from(
-        value: (
+        (device, config, raw_camera): (
             &'a wgpu::Device,
             &'a wgpu::SurfaceConfiguration,
             &'a CameraBind,
         ),
     ) -> Self {
         Self {
-            device: value.0,
-            config: value.1,
-            raw_camera: value.2,
+            device,
+            config,
+            raw_camera,
         }
     }
 }

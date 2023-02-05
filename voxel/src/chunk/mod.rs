@@ -7,10 +7,8 @@ use self::voxel::Voxel;
 pub mod voxel;
 
 pub const CHUNK_SIZE: usize = 32;
+
 lazy_static! {
-    // when SIZE 16, BIT_SIZE is 4
-    // by shifting 16 << 4 we get 1
-    // we with this get indexes from the collapsed array
     pub static ref BIT_SIZE: i32 = (CHUNK_SIZE as f32).log2() as i32;
 }
 

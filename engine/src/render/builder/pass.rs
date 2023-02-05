@@ -28,7 +28,7 @@ impl<'a> RenderPassBuilder<'a> {
 }
 
 impl<'a> RenderPassColorAttachmentBuilder<'a> {
-    pub fn into_color_attachment(self, view: &'a TextureView) -> RenderPassColorAttachment<'a> {
+    pub fn attach(self, view: &'a TextureView) -> RenderPassColorAttachment<'a> {
         RenderPassColorAttachment {
             view,
             resolve_target: self.resolve_target,
@@ -36,10 +36,10 @@ impl<'a> RenderPassColorAttachmentBuilder<'a> {
         }
     }
 
-    pub fn into_color_attachment_opt(
+    pub fn attach_opt(
         self,
         view: &'a TextureView,
     ) -> Option<RenderPassColorAttachment<'a>> {
-        Some(self.into_color_attachment(view))
+        Some(self.attach(view))
     }
 }

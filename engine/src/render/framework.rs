@@ -196,12 +196,7 @@ pub fn run<T: Framework>(window: Window, event_loop: EventLoop) {
                     let now = Instant::now();
                     let delta = time.time_delta();
 
-                    if delta >= target_frametime {
-                        window.request_redraw();
-                        time.post_update();
-                    } else {
-                        *control_flow = ControlFlow::WaitUntil(now + target_frametime - delta);
-                    }
+                    *control_flow = ControlFlow::WaitUntil(now + target_frametime - delta);
                 }
             }
             Event::MainEventsCleared => {
