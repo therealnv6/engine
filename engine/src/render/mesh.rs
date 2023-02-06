@@ -7,7 +7,7 @@ use super::{
     BufferArena,
 };
 
-#[derive(TypedBuilder)]
+#[derive(TypedBuilder, Debug)]
 pub struct Mesh {
     pub vertices: Vec<Vertex>,
     #[builder(default, setter(strip_option))]
@@ -60,6 +60,7 @@ impl Mesh {
     }
 }
 
+#[derive(Debug)]
 pub struct RawMesh {
     pub vertex_buffer: wgpu::Buffer,
     pub index_buffer: Option<wgpu::Buffer>,
@@ -90,7 +91,12 @@ pub trait UntypedMeshRender<'a> {
 
 pub trait MeshRender<'a> {
     fn render_single_mesh(&mut self, idx: u32, mesh: &'a RawMesh);
-    fn render_instanced_mesh(&mut self, idx: u32, instance: &'a TransformRaw, mesh: &'a RawMesh);
+    fn render_instanced_mesh(
+        &mut self,
+        idx: u32,
+        instances: &'a Vec<TransformRaw>,
+        mesh: &'a RawMesh,
+    );
 }
 
 impl<'a> UntypedMeshRender<'a> for RenderPass<'a> {
@@ -150,7 +156,12 @@ impl<'a> MeshRender<'a> for RenderPass<'a> {
         );
     }
 
-    fn render_instanced_mesh(&mut self, idx: u32, instance: &'a TransformRaw, mesh: &'a RawMesh) {
+    fn render_instanced_mesh(
+        &mut self,
+        idx: u32,
+        instances: &'a Vec<TransformRaw>,
+        mesh: &'a RawMesh,
+    ) {
         self.render_raw_mesh(
             idx,
             &mesh.vertex_buffer,

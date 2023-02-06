@@ -26,7 +26,7 @@ impl VertexDescriptor<2> for Vertex {
     }
 }
 
-#[derive(TypedBuilder)]
+#[derive(TypedBuilder, Debug)]
 pub struct Transform {
     pub translation: Vec3,
     pub rotation: Quat,

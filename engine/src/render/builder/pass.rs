@@ -36,10 +36,7 @@ impl<'a> RenderPassColorAttachmentBuilder<'a> {
         }
     }
 
-    pub fn attach_opt(
-        self,
-        view: &'a TextureView,
-    ) -> Option<RenderPassColorAttachment<'a>> {
+    pub fn attach_opt(self, view: &'a TextureView) -> Option<RenderPassColorAttachment<'a>> {
         Some(self.attach(view))
     }
 }

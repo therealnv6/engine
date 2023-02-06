@@ -5,6 +5,7 @@ pub mod bundle;
 pub mod camera;
 pub mod color;
 pub mod framework;
+pub mod handle;
 pub mod material;
 pub mod mesh;
 pub mod raw;

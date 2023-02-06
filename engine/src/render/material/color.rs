@@ -8,11 +8,12 @@ use crate::render::{
     vertex::{Vertex, VertexDescriptor},
 };
 
-#[derive(TypedBuilder)]
+#[derive(TypedBuilder, Debug, Clone)]
 pub struct StaticColorMaterial {
     color: Color,
 }
 
+#[derive(Debug)]
 pub struct RawStaticColorMaterial {
     pipeline: wgpu::RenderPipeline,
     bind_group: wgpu::BindGroup,

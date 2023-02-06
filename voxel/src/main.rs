@@ -1,7 +1,7 @@
 use engine::render::{
     self,
     builder::pass::{RenderPassBuilder, RenderPassColorAttachmentBuilder},
-    bundle::{MeshBundle, RawMeshBundle},
+    bundle::mesh::{Bundles, MeshBundle, RawMeshBundle},
     camera::{Camera, CameraBind, CameraPerspective, CameraRender},
     color::Color,
     framework::{EventLoop, Framework},
@@ -23,10 +23,10 @@ fn main() {
 }
 
 pub struct VoxelFramework {
-    mesh_bundle: RawMeshBundle<RawStaticColorMaterial>,
     camera: Camera,
     bind_camera: CameraPerspective,
     raw_bind_camera: CameraBind,
+    bundles: Bundles<StaticColorMaterial>,
 }
 
 const VERTICES: &[([f32; 3], [f32; 3])] = &[
@@ -44,6 +44,7 @@ impl Framework for VoxelFramework {
         device: &wgpu::Device,
         _: &wgpu::Queue,
     ) -> Self {
+        let mut bundles = Bundles::<StaticColorMaterial>::default();
         let tri_mesh = Mesh::builder()
             .vertices(
                 VERTICES
@@ -81,24 +82,27 @@ impl Framework for VoxelFramework {
             ]))
             .build();
 
-        let raw_mesh_bundle = MeshBundle::builder()
+        let mesh_bundle = MeshBundle::builder()
             .mesh(tri_mesh)
             .material(tri_mat)
-            // transforms don't work yet!
-            .transform(
-                Transform::builder()
-                    .translation([1.0, 1.0, 1.0].into())
-                    .rotation(Quat::from_vec4(Vec4::ZERO))
-                    .build(),
-            )
-            .build()
-            .into_raw(&params);
+            .build();
+
+        let mesh_handle = bundles.add(mesh_bundle);
+        bundles.instance(
+            mesh_handle,
+            Transform::builder()
+                .translation([1.0, 1.0, 1.0].into())
+                .rotation(Quat::from_vec4(Vec4::ZERO))
+                .build(),
+        );
+
+        bundles.process_queue(&params);
 
         Self {
-            mesh_bundle: raw_mesh_bundle,
             camera,
             bind_camera,
             raw_bind_camera,
+            bundles,
         }
     }
 
@@ -131,6 +135,9 @@ impl Framework for VoxelFramework {
             .update_buffer(queue, bytemuck::cast_slice(&[self.bind_camera]));
 
         render_pass.bind_camera(1, &self.raw_bind_camera);
-        render_pass.bind_raw(0, &self.mesh_bundle);
+
+        for (_, bundle) in self.bundles.iter() {
+            render_pass.bind_raw(0, bundle);
+        }
     }
 }
