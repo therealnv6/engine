@@ -1,10 +1,9 @@
-use anyhow::Context;
+
 use typed_builder::TypedBuilder;
 use wgpu::{util::DeviceExt, RenderPass};
 
 use super::{
     vertex::{TransformRaw, Vertex},
-    BufferArena,
 };
 
 #[derive(TypedBuilder, Debug)]
@@ -126,7 +125,7 @@ impl<'a> UntypedMeshRender<'a> for RenderPass<'a> {
         idx: u32,
         vertices: &'a wgpu::Buffer,
         indices: Option<&'a wgpu::Buffer>,
-        instance: &'a TransformRaw,
+        _instance: &'a TransformRaw,
         num_indices: usize,
         num_vertices: usize,
     ) {
@@ -159,7 +158,7 @@ impl<'a> MeshRender<'a> for RenderPass<'a> {
     fn render_instanced_mesh(
         &mut self,
         idx: u32,
-        instances: &'a Vec<TransformRaw>,
+        _instances: &'a Vec<TransformRaw>,
         mesh: &'a RawMesh,
     ) {
         self.render_raw_mesh(

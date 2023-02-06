@@ -1,6 +1,6 @@
 use glam::{Mat4, Quat, Vec3};
 use typed_builder::TypedBuilder;
-use wgpu::{util::DeviceExt, BufferUsages};
+
 
 use super::raw::RawParams;
 
@@ -40,7 +40,7 @@ pub struct TransformRaw {
 }
 
 impl Transform {
-    pub fn to_raw<'a>(&self, params: &'a RawParams) -> TransformRaw {
+    pub fn to_raw<'a>(&self, _params: &'a RawParams) -> TransformRaw {
         let model = Mat4::from_translation(self.translation) * Mat4::from_quat(self.rotation);
         let normal_matrix = model.inverse().transpose();
 
