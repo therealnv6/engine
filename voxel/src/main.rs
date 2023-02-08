@@ -5,7 +5,7 @@ use engine::render::{
     camera::{Camera, CameraBind, CameraPerspective, CameraRender},
     color::Color,
     framework::{EventLoop, Framework},
-    material::color::{StaticColorMaterial},
+    material::color::StaticColorMaterial,
     mesh::Mesh,
     raw::{RawBindingRender, RawParams},
     vertex::{Transform, Vertex},
@@ -86,13 +86,16 @@ impl Framework for VoxelFramework {
             .build();
 
         let mesh_handle = bundles.add(mesh_bundle);
-        bundles.instance(
-            mesh_handle,
-            Transform::builder()
-                .translation([1.0, 1.0, 1.0].into())
-                .rotation(Quat::from_vec4(Vec4::ZERO))
-                .build(),
-        );
+
+        for i in 0..4 {
+            bundles.instance(
+                mesh_handle,
+                Transform::builder()
+                    .translation([i as f32, i as f32, i as f32].into())
+                    .rotation(Quat::from_vec4(Vec4::ZERO))
+                    .build(),
+            );
+        }
 
         bundles.process_queue(&params);
 

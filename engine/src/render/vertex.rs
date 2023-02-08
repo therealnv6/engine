@@ -1,7 +1,6 @@
 use glam::{Mat4, Quat, Vec3};
 use typed_builder::TypedBuilder;
 
-
 use super::raw::RawParams;
 
 #[repr(C)]
@@ -53,14 +52,14 @@ impl Transform {
 
 impl VertexDescriptor<8> for TransformRaw {
     const ATTRIBS: [wgpu::VertexAttribute; 8] = wgpu::vertex_attr_array![
-        0 => Float32x4,
-        1 => Float32x4,
-        2 => Float32x4,
-        3 => Float32x4,
-        4 => Float32x4,
         5 => Float32x4,
         6 => Float32x4,
-        7 => Float32x4
+        7 => Float32x4,
+        8 => Float32x4,
+        9 => Float32x4,
+        10 => Float32x4,
+        11 => Float32x4,
+        12 => Float32x4
     ];
 
     fn descript<'a>() -> wgpu::VertexBufferLayout<'a> {

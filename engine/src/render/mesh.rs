@@ -1,10 +1,7 @@
-
 use typed_builder::TypedBuilder;
 use wgpu::{util::DeviceExt, RenderPass};
 
-use super::{
-    vertex::{TransformRaw, Vertex},
-};
+use super::vertex::{TransformRaw, Vertex};
 
 #[derive(TypedBuilder, Debug)]
 pub struct Mesh {
@@ -82,7 +79,8 @@ pub trait UntypedMeshRender<'a> {
         idx: u32,
         vertices: &'a wgpu::Buffer,
         indices: Option<&'a wgpu::Buffer>,
-        instance: &'a TransformRaw,
+        instance: &'a Vec<TransformRaw>,
+        instance_buffer: &'a wgpu::Buffer,
         num_indices: usize,
         num_vertices: usize,
     );
@@ -94,6 +92,7 @@ pub trait MeshRender<'a> {
         &mut self,
         idx: u32,
         instances: &'a Vec<TransformRaw>,
+        instance_buffer: &'a wgpu::Buffer,
         mesh: &'a RawMesh,
     );
 }
@@ -125,21 +124,22 @@ impl<'a> UntypedMeshRender<'a> for RenderPass<'a> {
         idx: u32,
         vertices: &'a wgpu::Buffer,
         indices: Option<&'a wgpu::Buffer>,
-        _instance: &'a TransformRaw,
+        instance: &'a Vec<TransformRaw>,
+        instance_buffer: &'a wgpu::Buffer,
         num_indices: usize,
         num_vertices: usize,
     ) {
         self.set_vertex_buffer(idx, vertices.slice(..));
-        // self.set_vertex_buffer(idx + 1, instance.)
+        self.set_vertex_buffer(idx + 1, instance_buffer.slice(..));
 
         if let Some(index_buffer) = &indices {
             self.set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint32);
         }
 
         if num_indices != 0 {
-            self.draw_indexed(0..(num_indices as u32), 0, 0..1);
+            self.draw_indexed(0..(num_indices as u32), 0, 0..instance.len() as u32);
         } else {
-            self.draw(0..(num_vertices as u32), 0..1);
+            self.draw(0..(num_vertices as u32), 0..instance.len() as u32);
         }
     }
 }
@@ -158,13 +158,16 @@ impl<'a> MeshRender<'a> for RenderPass<'a> {
     fn render_instanced_mesh(
         &mut self,
         idx: u32,
-        _instances: &'a Vec<TransformRaw>,
+        instances: &'a Vec<TransformRaw>,
+        instance_buffer: &'a wgpu::Buffer,
         mesh: &'a RawMesh,
     ) {
-        self.render_raw_mesh(
+        self.render_instanced_raw_mesh(
             idx,
             &mesh.vertex_buffer,
             mesh.index_buffer.as_ref(),
+            instances,
+            instance_buffer,
             mesh.num_indices,
             mesh.num_vertices,
         );

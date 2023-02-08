@@ -1,6 +1,10 @@
 use std::collections::{hash_map::Iter, HashMap};
 
 use typed_builder::TypedBuilder;
+use wgpu::{
+    util::{BufferInitDescriptor, DeviceExt},
+    BufferUsages,
+};
 
 use crate::render::{
     handle::HandleId,
@@ -52,7 +56,7 @@ impl<T: IntoRawBinder> Bundles<T> {
             let raw_bundle = self.bundles.get_mut(&id);
 
             if let Some(raw_bundle) = raw_bundle {
-                raw_bundle.instances.push(raw);
+                raw_bundle.instance(&params, raw);
             }
         }
     }
@@ -75,18 +79,38 @@ pub struct RawMeshBundle<T: RawBinder> {
     pub(crate) mesh: RawMesh,
     pub(crate) material: T,
     pub(crate) instances: Vec<TransformRaw>,
+    pub(crate) instance_buffer: Option<wgpu::Buffer>,
+}
+
+impl<T: RawBinder> RawMeshBundle<T> {
+    pub fn instance(&mut self, params: &RawParams, instance: TransformRaw) {
+        self.instances.push(instance);
+        self.update_buffer(params);
+    }
+
+    pub fn update_buffer(&mut self, params: &RawParams) {
+        let buffer = params
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("mesh instance buffer"),
+                usage: BufferUsages::VERTEX,
+                contents: bytemuck::cast_slice(&self.instances),
+            });
+
+        self.instance_buffer = Some(buffer);
+    }
 }
 
 impl<T: RawBinder> RawBinder for RawMeshBundle<T> {
     fn bind_to_pass<'a>(&'a self, idx: u32, render_pass: &mut wgpu::RenderPass<'a>) {
         render_pass.bind_raw(idx, &self.material);
 
-        if self.instances.is_empty() {
-            println!("hi!");
-            render_pass.render_single_mesh(0, &self.mesh);
-        } else {
-            render_pass.render_instanced_mesh(0, &self.instances, &self.mesh);
-        }
+        match &self.instance_buffer {
+            Some(buffer) => {
+                render_pass.render_instanced_mesh(0, &self.instances, buffer, &self.mesh)
+            }
+            None => render_pass.render_single_mesh(0, &self.mesh),
+        };
     }
 }
 
@@ -101,6 +125,7 @@ impl<T: IntoRawBinder> IntoRawBinder for MeshBundle<T> {
             mesh: raw_mesh,
             material: raw_mat,
             instances: Vec::new(),
+            instance_buffer: None,
         }
     }
 }

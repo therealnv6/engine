@@ -5,7 +5,7 @@ use crate::render::{
     builder::pipeline::PipelineBuilder,
     color::Color,
     raw::{IntoRawBinder, RawBinder},
-    vertex::{Vertex, VertexDescriptor},
+    vertex::{TransformRaw, Vertex, VertexDescriptor},
 };
 
 #[derive(TypedBuilder, Debug, Clone)]
@@ -58,7 +58,7 @@ impl IntoRawBinder for StaticColorMaterial {
 
         let pipeline = PipelineBuilder::builder()
             .pipeline_layout(Some(&render_pipeline_layout))
-            .vertex_layouts(&[Vertex::descript()])
+            .vertex_layouts(&[Vertex::descript(), TransformRaw::descript()])
             .shader_module(shader)
             .label("tri")
             .fragment(true)
